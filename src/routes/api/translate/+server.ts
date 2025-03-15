@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { env } from '$env/dynamic/public';
 
-export const POST: RequestHandler = async ({ request }: { request: Request }) => {
+export const POST: RequestHandler = async ({ request }) => {
     try {
         const { text, targetLang } = await request.json();
 
@@ -15,6 +15,7 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
         }
 
         const apiKey = env.PUBLIC_DEEPL_KEY;
+        console.log("DeepL API Key:", apiKey); // Log the API key
 
         if (!apiKey) {
             return json({ error: 'DeepL API key not configured' }, { status: 500 });
@@ -34,10 +35,12 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
 
         if (!response.ok) {
             const errorData = await response.json();
+            console.error("DeepL API Error:", errorData); // Log the error
             return json({ error: errorData.message || 'Translation failed' }, { status: response.status });
         }
 
         const data = await response.json();
+        console.log("DeepL API Response:", data); // Log the response
         const translatedText = data.translations[0].text;
 
         return json({ translatedText });

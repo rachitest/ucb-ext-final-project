@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { env } from '$env/dynamic/public';
+import { env } from '$env/dynamic/private'; // Changed from public to private
 
 export const POST: RequestHandler = async ({ request }) => {
     try {
@@ -14,10 +14,11 @@ export const POST: RequestHandler = async ({ request }) => {
             return json({ error: 'No target language provided' }, { status: 400 });
         }
 
-        const apiKey = env.PUBLIC_DEEPL_KEY;
-        console.log("DeepL API Key:", apiKey); // Log the API key
+        // Try multiple potential environment variable names
+        const apiKey = env.DEEPL_API_KEY || env.DEEPL_KEY || env.PUBLIC_DEEPL_KEY;
 
         if (!apiKey) {
+            console.error('No DeepL API key found in environment variables');
             return json({ error: 'DeepL API key not configured' }, { status: 500 });
         }
 
@@ -34,13 +35,23 @@ export const POST: RequestHandler = async ({ request }) => {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            console.error("DeepL API Error:", errorData); // Log the error
-            return json({ error: errorData.message || 'Translation failed' }, { status: response.status });
+            const errorText = await response.text(); // Get response as text first
+            console.error("DeepL API Error Status:", response.status);
+            console.error("DeepL API Error Response:", errorText);
+
+            let errorMessage = 'Translation failed';
+            try {
+                const errorData = JSON.parse(errorText);
+                errorMessage = errorData.message || errorMessage;
+            } catch (e) {
+                // If parsing fails, use the text as is
+                errorMessage = errorText || errorMessage;
+            }
+
+            return json({ error: errorMessage }, { status: response.status });
         }
 
         const data = await response.json();
-        console.log("DeepL API Response:", data); // Log the response
         const translatedText = data.translations[0].text;
 
         return json({ translatedText });

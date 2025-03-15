@@ -14,6 +14,7 @@ const config = {
 		adapter: adapter(),
 		env: {
 			publicPrefix: 'PUBLIC_',
+			privatePrefix: ''
 		}
 	}
 };

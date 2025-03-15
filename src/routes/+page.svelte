@@ -1,64 +1,100 @@
-<script>
-    import Navbar from "$lib/Navbar.svelte";
-    import { onMount } from "svelte";
-
-    /**
-     * @type {string | any[]}
-     */
-    let decks = [];
-
-    onMount(async () => {
-        //Temp hardcoded decks since backend isn't initialized
-        decks = [
-            { id: 1, title: "French Vocabulary", cards: 15, progress: 60 },
-            { id: 2, title: "Spanish Verbs", cards: 30, progress: 20 },
-            { id: 3, title: "German Nouns", cards: 10, progress: 80 },
-        ];
-    });
+<script lang="ts">
+    import { goto } from "$app/navigation";
 </script>
 
-<Navbar />
+<section class="hero">
+    <h1>Welcome to Flashy</h1>
+    <p>A useful tool for learning through customizable flashcards</p>
+    <button on:click={() => goto("/dashboard")}>Get Started</button>
+</section>
 
-<main class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold mb-4">My Decks</h1>
-
-    {#if decks.length === 0}
-        <p>No decks yet. Create one!</p>
-    {:else}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {#each decks as deck (deck.id)}
-                <div class="bg-white dark:bg-gray-700 rounded-lg shadow-md p-4">
-                    <h2 class="text-lg font-semibold">{deck.title}</h2>
-                    <p class="text-gray-600 dark:text-gray-400">
-                        {deck.cards} Cards
-                    </p>
-                    <div
-                        class="h-2 bg-gray-200 dark:bg-gray-600 rounded-full mt-2"
-                    >
-                        <div
-                            class="h-full bg-blue-500 rounded-full"
-                            style="width: {deck.progress}%"
-                        ></div>
-                    </div>
-                    <div class="mt-4 flex justify-end">
-                        <button
-                            class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-                        >
-                            /** Three-dot menu icon (replace with actual icon)
-                            */ ...
-                        </button>
-                    </div>
-                </div>
-            {/each}
+<section class="features">
+    <h2>Features</h2>
+    <div class="grid">
+        <div class="card feature">
+            <h3>Create Custom Decks</h3>
+            <p>
+                Organize your learning materials into custom decks to match your
+                study needs.
+            </p>
         </div>
-    {/if}
-
-    <div class="mt-8">
-        <a
-            href="/create"
-            class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-        >
-            Create New Deck
-        </a>
+        <div class="card feature">
+            <h3>Track Your Progress</h3>
+            <p>
+                Monitor your learning progress for each deck and individual
+                cards.
+            </p>
+        </div>
+        <div class="card feature">
+            <h3>Text-to-Speech</h3>
+            <p>
+                Listen to your flashcards with the built-in Web Speech API
+                integration.
+            </p>
+        </div>
+        <div class="card feature">
+            <h3>Translation Support</h3>
+            <p>
+                Translate your flashcards to different languages using the DeepL
+                API.
+            </p>
+        </div>
     </div>
-</main>
+</section>
+
+<style lang="scss">
+    .hero {
+        text-align: center;
+        padding: 4rem 1rem;
+        background: linear-gradient(
+            120deg,
+            var(--primary-color),
+            var(--secondary-color)
+        );
+        color: white;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        button {
+            background-color: white;
+            color: var(--primary-color);
+            font-size: 1.125rem;
+            padding: 0.75rem 2rem;
+
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.9);
+            }
+        }
+    }
+
+    .features {
+        padding: 2rem 0;
+
+        h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        .feature {
+            padding: 1.5rem;
+            text-align: center;
+
+            h3 {
+                color: var(--primary-color);
+                margin-bottom: 1rem;
+            }
+        }
+    }
+</style>

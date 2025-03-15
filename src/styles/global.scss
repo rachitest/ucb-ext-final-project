@@ -1,0 +1,177 @@
+@use "sass:color";
+
+:root {
+    // Light theme variables
+    --background-color: #ffffff;
+    --text-color: #333333;
+    --primary-color: #3a86ff;
+    --secondary-color: #8338ec;
+    --accent-color: #ff006e;
+    --card-background: #f5f5f5;
+    --card-border: #e0e0e0;
+    --progress-background: #e0e0e0;
+    --success-color: #34c759;
+    --warning-color: #ff9500;
+    --error-color: #ff3b30;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] {
+    // Dark theme variables
+    --background-color: #121212;
+    --text-color: #e0e0e0;
+    --primary-color: #5b9fff;
+    --secondary-color: #9d66ff;
+    --accent-color: #ff4087;
+    --card-background: #242424;
+    --card-border: #333333;
+    --progress-background: #333333;
+    --success-color: #30d158;
+    --warning-color: #ff9f0a;
+    --error-color: #ff453a;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+
+    &:hover {
+        background-color: color.adjust(#3a86ff, $lightness: -10%);
+    }
+
+    &.secondary {
+        background-color: var(--secondary-color);
+
+        &:hover {
+            background-color: color.adjust(#8338ec, $lightness: -10%);
+        }
+    }
+
+    &.danger {
+        background-color: var(--error-color);
+
+        &:hover {
+            background-color: color.adjust(#ff3b30, $lightness: -10%);
+        }
+    }
+
+    &.icon {
+        padding: 0.5rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+.card {
+    background-color: var(--card-background);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+}
+
+.progress-bar {
+    height: 8px;
+    background-color: var(--progress-background);
+    border-radius: 4px;
+    overflow: hidden;
+
+    .progress {
+        height: 100%;
+        background-color: var(--success-color);
+        transition: width 0.3s ease;
+    }
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+
+    label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
+    input,
+    textarea {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid var(--card-border);
+        border-radius: 4px;
+        background-color: var(--card-background);
+        color: var(--text-color);
+
+        &:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+    }
+}
+
+.flex {
+    display: flex;
+}
+
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.icon-button {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: 0.25rem;
+
+    &:hover {
+        color: var(--primary-color);
+    }
+}

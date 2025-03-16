@@ -12,12 +12,6 @@
                 (v) => v.voiceURI === savedVoiceURI,
             );
             if (voice) selectedVoice = voice;
-        } else {
-            // Set default voice to English if available
-            const englishVoice = availableVoices.find((voice) =>
-                voice.lang.startsWith("en"),
-            );
-            selectedVoice = englishVoice || availableVoices[0];
         }
     });
 
@@ -37,3 +31,23 @@
         {/each}
     </select>
 </div>
+
+<style lang="scss">
+    .tts-language-selector {
+        margin-bottom: 1rem;
+
+        label {
+            margin-right: 0.5rem;
+            font-weight: 500;
+        }
+
+        select {
+            padding: 0.5rem;
+            border: 1px solid var(--card-border);
+            border-radius: 4px;
+            background-color: var(--card-background);
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+    }
+</style>

@@ -58,56 +58,34 @@
             margin-bottom: 1.5rem;
             line-height: 1.6;
         }
-
-        .card-actions {
-            display: flex;
-            flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-
-            button {
-                flex: 1 1 auto; /* Allow buttons to grow and shrink */
-                white-space: nowrap;
-                min-width: 120px; /* Set a minimum width for buttons */
-            }
-
-            .icon-action {
-                background: none;
-                color: var(--primary-color);
-                border: 1px solid var(--primary-color);
-                padding: 0.5rem 1rem;
-                border-radius: 4px;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                font-size: 0.9rem;
-                cursor: pointer;
-
-                &:hover:not(:disabled) {
-                    background-color: var(--primary-color);
-                    color: white;
-                }
-
-                &:disabled {
-                    opacity: 0.5;
-                    cursor: not-allowed;
-                }
-            }
-        }
     }
 
-    /* Responsive adjustments for mobile */
-    @media (max-width: 768px) {
-        .flashcard-front {
-            padding: 1rem;
+    .card-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
 
-            .card-actions {
-                flex-direction: column; /* Stack buttons vertically on mobile */
-                gap: 0.5rem;
+        .icon-action {
+            background: none;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            cursor: pointer;
 
-                button {
-                    width: 100%; /* Full width buttons on mobile */
-                }
+            &:hover:not(:disabled) {
+                background-color: var(--primary-color);
+                color: white;
+            }
+
+            &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
             }
         }
     }

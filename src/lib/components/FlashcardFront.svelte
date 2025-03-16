@@ -26,7 +26,7 @@
         </button>
 
         <TranslationControls
-            {selectedLanguage}
+            bind:selectedLanguage
             translatedText={translatedTextFront}
             translationError={translationErrorFront}
             isTranslating={isTranslatingFront}
@@ -45,6 +45,8 @@
         border: 1px solid var(--card-border);
         border-radius: 8px;
         box-shadow: var(--shadow);
+        min-width: 0; // added
+        overflow-wrap: anywhere; //added
 
         h2 {
             font-size: 1.5rem;
@@ -62,6 +64,7 @@
 
     .card-actions {
         display: flex;
+        flex-wrap: wrap; // Added to handle wrapping on small screens
         align-items: center;
         gap: 1rem;
         margin-bottom: 1.5rem;
@@ -77,6 +80,7 @@
             gap: 0.5rem;
             font-size: 0.9rem;
             cursor: pointer;
+            white-space: nowrap; // Added
 
             &:hover:not(:disabled) {
                 background-color: var(--primary-color);

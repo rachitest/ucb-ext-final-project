@@ -35,22 +35,30 @@
   onMount(() => {
     if (!deck || deck.cards.length === 0) {
       goto("/dashboard");
+      return; // Important: Stop execution if redirecting
     }
-
     // Load available voices for TTS
     loadVoices();
   });
 
   function loadVoices() {
-    availableVoices = window.speechSynthesis.getVoices();
+    // Use onvoiceschanged to ensure voices are loaded
+    window.speechSynthesis.onvoiceschanged = () => {
+      availableVoices = window.speechSynthesis.getVoices();
+      // Try to load the previously selected voice, or default to the first available
+      const savedVoiceURI = localStorage.getItem("selectedVoiceURI");
+      selectedVoice =
+        availableVoices.find((v) => v.voiceURI === savedVoiceURI) ||
+        availableVoices[0];
+    };
 
-    if (availableVoices.length === 0) {
-      window.speechSynthesis.onvoiceschanged = () => {
-        availableVoices = window.speechSynthesis.getVoices();
-        selectedVoice = availableVoices[0]; // Set default voice
-      };
-    } else {
-      selectedVoice = availableVoices[0]; // Set default voice
+    // Check if voices are already loaded (they might be in some browsers)
+    availableVoices = window.speechSynthesis.getVoices();
+    if (availableVoices.length > 0) {
+      const savedVoiceURI = localStorage.getItem("selectedVoiceURI");
+      selectedVoice =
+        availableVoices.find((v) => v.voiceURI === savedVoiceURI) ||
+        availableVoices[0];
     }
   }
 
@@ -195,24 +203,20 @@
         <div class="progress-text">
           Card {currentCardIndex + 1} of {deck.cards.length}
         </div>
-        <button class="finish-btn" on:click={finishStudying}
-          >Finish Studying</button
-        >
+        <button class="finish-btn" on:click={finishStudying}>
+          Finish Studying
+        </button>
       </div>
     </div>
 
     <TtsLanguageSelector {availableVoices} bind:selectedVoice />
-
-    <ProgressBar
-      progress={((currentCardIndex + 1) / deck.cards.length) * 100}
-    />
 
     <div class="flashcard-container">
       <div class="card flashcard">
         <FlashcardFront
           card={currentCard}
           {isSpeaking}
-          {selectedLanguage}
+          bind:selectedLanguage
           {translatedTextFront}
           {translationErrorFront}
           {isTranslatingFront}
@@ -223,12 +227,11 @@
         {#if showAnswer}
           <FlashcardBack
             card={currentCard}
-            {deckId}
             {isSpeaking}
             {speak}
             {updateProgress}
             hideAnswer={toggleAnswer}
-            {selectedLanguage}
+            bind:selectedLanguage
             {translatedTextBack}
             {translationErrorBack}
             {isTranslatingBack}

@@ -29,7 +29,7 @@
         </button>
 
         <TranslationControls
-            {selectedLanguage}
+            bind:selectedLanguage
             translatedText={translatedTextBack}
             translationError={translationErrorBack}
             isTranslating={isTranslatingBack}
@@ -82,6 +82,8 @@
         border: 1px solid var(--card-border);
         border-radius: 8px;
         box-shadow: var(--shadow);
+        min-width: 0; // added
+        overflow-wrap: anywhere; //added
 
         h2 {
             font-size: 1.5rem;
@@ -98,12 +100,12 @@
 
         .card-actions {
             display: flex;
-            flex-wrap: wrap;
+            flex-wrap: wrap; // Added
             gap: 0.5rem;
             margin-bottom: 1.5rem;
 
             button {
-                flex: 1 1 auto;
+                flex: 1 1 auto; // Added
                 white-space: nowrap;
             }
 

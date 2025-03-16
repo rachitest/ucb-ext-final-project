@@ -1,7 +1,7 @@
 <script lang="ts">
     import { languages } from "$lib/languages";
 
-    export let selectedLanguage: string;
+    export let selectedLanguage: string; // No change needed, already correct
     export let translatedText: string;
     export let translationError: string;
     export let isTranslating: boolean;
@@ -46,14 +46,18 @@
     .translation-container {
         margin-top: 1rem;
         width: 100%;
+        min-width: 0; // added
+        overflow-wrap: anywhere; //added
 
         .translation-controls {
             display: flex;
             gap: 0.5rem;
             margin-bottom: 1rem;
+            flex-wrap: wrap; // Added to handle wrapping on small screens
 
             select {
                 flex: 1;
+                max-width: 70%; // Add max-width for smaller screens
                 padding: 0.5rem;
                 border: 1px solid var(--card-border);
                 border-radius: 4px;
@@ -70,6 +74,7 @@
                 color: white;
                 font-size: 0.9rem;
                 cursor: pointer;
+                white-space: nowrap; // Prevent button text from wrapping
 
                 &:hover {
                     background-color: color.adjust(#3a86ff, $lightness: -10%);

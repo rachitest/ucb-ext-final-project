@@ -6,6 +6,10 @@ export const POST: RequestHandler = async ({ request }) => {
     try {
         const { text, targetLang } = await request.json();
 
+        if (!env.AZURE_TRANSLATOR_KEY) {
+            return json({ error: 'Azure Translator API key not configured.  Set AZURE_TRANSLATOR_KEY in your environment variables.' }, { status: 500 });
+        }
+
         if (!text) {
             return json({ error: 'No text provided' }, { status: 400 });
         }
@@ -15,12 +19,6 @@ export const POST: RequestHandler = async ({ request }) => {
         }
 
         const apiKey = env.AZURE_TRANSLATOR_KEY;
-
-        if (!apiKey) {
-            console.error('No Azure Translator API key found in environment variables');
-            return json({ error: 'Azure Translator API key not configured' }, { status: 500 });
-        }
-
         const region = env.AZURE_TRANSLATOR_REGION || 'global'; // Default to 'global' if region is not set
 
         const response = await fetch(
@@ -46,7 +44,7 @@ export const POST: RequestHandler = async ({ request }) => {
                 const errorData = JSON.parse(errorText);
                 errorMessage = errorData.error?.message || errorMessage;
             } catch (e) {
-                errorMessage = errorText || errorMessage;
+                errorMessage = `Translation failed with status ${response.status}: ${errorText}`;
             }
 
             return json({ error: errorMessage }, { status: response.status });
@@ -58,6 +56,6 @@ export const POST: RequestHandler = async ({ request }) => {
         return json({ translatedText });
     } catch (error) {
         console.error('Translation error:', error);
-        return json({ error: 'Failed to translate text' }, { status: 500 });
+        return json({ error: 'Failed to translate text: ' + (error instanceof Error ? error.message : 'Unknown error') }, { status: 500 });
     }
 };

@@ -2,6 +2,8 @@
 
 ZapLearn is a web application built with SvelteKit, Svelte 5, TypeScript, and Sass, designed to help you learn effectively using customizable flashcards. It features Text-to-Speech (TTS) capabilities, translation support via the Azure Translator API, progress tracking, and persistent data storage using Airtable.
 
+Access it [here](zaplearn.pages.dev)
+
 ## Screenshots
 
 * **Landing Page:**
@@ -123,9 +125,10 @@ This project fulfills the requirements as follows:
 
 * **Web App:** ZapLearn is a 3+ page interactive web app with dynamic data and behavior.  It uses a router framework (SvelteKit) to manage navigation between different views.
 * **Framework:**  The project uses the **SvelteKit** and **Svelte** JavaScript frameworks.
-* **Data / APIs:** The project utilizes *two* different APIs:
+* **Data / APIs:** The project utilizes *three* different APIs:
     1. **Airtable API:** Used for persistent data storage (decks, cards, progress).
     2. **Azure Translator API:** Used for translating card content.
+    3. **Web Speech API:** Used for TTS.
 * **Backend:** The project uses **Airtable** as a configured backend service provider. While it does not implement explicit user *authentication*, it does provide **user-contributed data** persistence. Each user's data is stored separately based on a unique ID generated and stored in the browser's local storage. There's no shared "mod" view, but the data structure *could* be extended to support one, as Airtable itself provides an interface for viewing and modifying all data. This fulfills the backend requirement for user-contributed data, though not for user authentication.
 
-In summary, the application meets *all* the specified requirements. It uses one framework (Svelte/SvelteKit), two APIs (Airtable and Azure Translator), and a configured backend (Airtable) that supports user-contributed data.
+In summary, the application meets *all* the specified requirements. It uses one framework (Svelte/SvelteKit), three APIs (Airtable, Azure Translator, Web Speech), and a configured backend (Airtable) that supports user-contributed data.

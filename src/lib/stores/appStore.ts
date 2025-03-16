@@ -3,38 +3,57 @@ import { browser } from '$app/environment';
 import { v4 as uuidv4 } from 'uuid';
 import type { AppState, Deck, Card } from '$lib/types';
 
-// Initialize with default values
-const defaultState: AppState = {
-    decks: [],
-    theme: 'light'
-};
+// --- Generate or Retrieve User ID ---
+let userId: string;
+
+if (browser) {
+    userId = localStorage.getItem('flashcard-app-user-id') || uuidv4();
+    localStorage.setItem('flashcard-app-user-id', userId);
+} else {
+    userId = 'server-user'; // Placeholder for SSR (important for SvelteKit)
+}
+
+// --- Load Initial State (from Airtable via API) ---
+async function loadInitialState(): Promise<AppState> {
+    if (browser) {
+        const response = await fetch('/api/airtable', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ type: 'get', userId }),
+        });
+
+        if (response.ok) {
+            const { data } = await response.json();
+            if (data) {
+                return data;
+            }
+        }
+    }
+
+    // Default state if no data is found (or during SSR)
+    return {
+        decks: [],
+        theme: 'light',
+    };
+}
+
+// Add a loading state
+interface AppStoreState {
+    loading: boolean;
+    data: AppState;
+}
 
 // Create the store
 function createAppStore() {
-    // Load from localStorage if available
-    const initialState = browser
-        ? JSON.parse(localStorage.getItem('flashcard-app-state') || JSON.stringify(defaultState))
-        : defaultState;
+    const { subscribe, set, update } = writable<AppStoreState>(
+        { loading: true, data: { decks: [], theme: 'light' } }, // Initial value
+    );
 
-    // Parse date strings back to Date objects
-    if (initialState.decks) {
-        initialState.decks.forEach((deck: Deck) => {
-            deck.created = new Date(deck.created);
-            deck.lastModified = new Date(deck.lastModified);
-            deck.cards.forEach((card: Card) => {
-                if (card.lastStudied) {
-                    card.lastStudied = new Date(card.lastStudied);
-                }
-            });
-        });
-    }
-
-    const { subscribe, set, update } = writable<AppState>(initialState);
-
-    // Save to localStorage whenever the state changes
     if (browser) {
-        subscribe(state => {
-            localStorage.setItem('flashcard-app-state', JSON.stringify(state));
+        loadInitialState().then(initialState => {
+            set({ loading: false, data: initialState });
         });
     }
 
@@ -42,10 +61,22 @@ function createAppStore() {
         subscribe,
 
         // Theme actions
-        toggleTheme: () => update(state => ({
-            ...state,
-            theme: state.theme === 'light' ? 'dark' : 'light'
-        })),
+        toggleTheme: () => update(state => {
+            const newData: AppState = {
+                ...state.data,
+                theme: state.data.theme === 'light' ? 'dark' : 'light'
+            };
+            if (browser) {
+                fetch('/api/airtable', { // Call the API to save
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ type: 'save', userId, appState: newData }),
+                });
+            }
+            return { ...state, data: newData };
+        }),
 
         // Deck actions
         addDeck: (name: string, description: string) => update(state => {
@@ -58,36 +89,69 @@ function createAppStore() {
                 lastModified: new Date(),
                 totalProgress: 0
             };
-            return {
-                ...state,
-                decks: [...state.decks, newDeck]
+            const newData: AppState = {
+                ...state.data,
+                decks: [...state.data.decks, newDeck]
             };
+
+            if (browser) {
+                fetch('/api/airtable', { // Call the API to save
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ type: 'save', userId, appState: newData }),
+                });
+            }
+            return { ...state, data: newData };
         }),
 
         updateDeck: (id: string, updates: Partial<Deck>) => update(state => {
-            const deckIndex = state.decks.findIndex(d => d.id === id);
+            const deckIndex = state.data.decks.findIndex(d => d.id === id);
             if (deckIndex === -1) return state;
 
             const updatedDeck = {
-                ...state.decks[deckIndex],
+                ...state.data.decks[deckIndex],
                 ...updates,
                 lastModified: new Date()
             };
 
-            const decks = [...state.decks];
+            const decks = [...state.data.decks];
             decks[deckIndex] = updatedDeck;
+            const newData: AppState = { ...state.data, decks };
 
-            return { ...state, decks };
+            if (browser) {
+                fetch('/api/airtable', { // Call the API to save
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ type: 'save', userId, appState: newData }),
+                });
+            }
+            return { ...state, data: newData };
         }),
 
-        deleteDeck: (id: string) => update(state => ({
-            ...state,
-            decks: state.decks.filter(deck => deck.id !== id)
-        })),
+        deleteDeck: (id: string) => update(state => {
+            const newData: AppState = {
+                ...state.data,
+                decks: state.data.decks.filter(deck => deck.id !== id)
+            };
+            if (browser) {
+                fetch('/api/airtable', { // Call the API to save
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ type: 'save', userId, appState: newData }),
+                });
+            }
+            return { ...state, data: newData };
+        }),
 
         // Card actions
         addCard: (deckId: string, front: string, back: string) => update(state => {
-            const deckIndex = state.decks.findIndex(d => d.id === deckId);
+            const deckIndex = state.data.decks.findIndex(d => d.id === deckId);
             if (deckIndex === -1) return state;
 
             const newCard: Card = {
@@ -98,7 +162,7 @@ function createAppStore() {
                 lastStudied: null
             };
 
-            const deck = { ...state.decks[deckIndex] };
+            const deck = { ...state.data.decks[deckIndex] };
             deck.cards = [...deck.cards, newCard];
             deck.lastModified = new Date();
 
@@ -107,20 +171,30 @@ function createAppStore() {
                 ? deck.cards.reduce((sum, card) => sum + card.progress, 0) / deck.cards.length
                 : 0;
 
-            const decks = [...state.decks];
+            const decks = [...state.data.decks];
             decks[deckIndex] = deck;
 
-            return { ...state, decks };
+            const newData: AppState = { ...state.data, decks };
+            if (browser) {
+                fetch('/api/airtable', { // Call the API to save
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ type: 'save', userId, appState: newData }),
+                });
+            }
+            return { ...state, data: newData };
         }),
 
         updateCard: (deckId: string, cardId: string, updates: Partial<Card>) => update(state => {
-            const deckIndex = state.decks.findIndex(d => d.id === deckId);
+            const deckIndex = state.data.decks.findIndex(d => d.id === deckId);
             if (deckIndex === -1) return state;
 
-            const cardIndex = state.decks[deckIndex].cards.findIndex(c => c.id === cardId);
+            const cardIndex = state.data.decks[deckIndex].cards.findIndex(c => c.id === cardId);
             if (cardIndex === -1) return state;
 
-            const deck = { ...state.decks[deckIndex] };
+            const deck = { ...state.data.decks[deckIndex] };
             const cards = [...deck.cards];
 
             cards[cardIndex] = {
@@ -137,17 +211,26 @@ function createAppStore() {
                 ? deck.cards.reduce((sum, card) => sum + card.progress, 0) / deck.cards.length
                 : 0;
 
-            const decks = [...state.decks];
+            const decks = [...state.data.decks];
             decks[deckIndex] = deck;
-
-            return { ...state, decks };
+            const newData: AppState = { ...state.data, decks };
+            if (browser) {
+                fetch('/api/airtable', { // Call the API to save
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ type: 'save', userId, appState: newData }),
+                });
+            }
+            return { ...state, data: newData };
         }),
 
         deleteCard: (deckId: string, cardId: string) => update(state => {
-            const deckIndex = state.decks.findIndex(d => d.id === deckId);
+            const deckIndex = state.data.decks.findIndex(d => d.id === deckId);
             if (deckIndex === -1) return state;
 
-            const deck = { ...state.decks[deckIndex] };
+            const deck = { ...state.data.decks[deckIndex] };
             deck.cards = deck.cards.filter(card => card.id !== cardId);
             deck.lastModified = new Date();
 
@@ -156,16 +239,26 @@ function createAppStore() {
                 ? deck.cards.reduce((sum, card) => sum + card.progress, 0) / deck.cards.length
                 : 0;
 
-            const decks = [...state.decks];
+            const decks = [...state.data.decks];
             decks[deckIndex] = deck;
+            const newData: AppState = { ...state.data, decks };
 
-            return { ...state, decks };
+            if (browser) {
+                fetch('/api/airtable', { // Call the API to save
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ type: 'save', userId, appState: newData }),
+                });
+            }
+            return { ...state, data: newData };
         })
     };
 }
 
 export const appStore = createAppStore();
 
-// Create derived stores for convenience
-export const theme = derived(appStore, $appStore => $appStore.theme);
-export const decks = derived(appStore, $appStore => $appStore.decks);
+// Update derived stores
+export const theme = derived(appStore, $appStore => $appStore.data.theme);
+export const decks = derived(appStore, $appStore => $appStore.data.decks);

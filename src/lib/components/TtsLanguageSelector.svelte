@@ -1,0 +1,53 @@
+<script lang="ts">
+    import { onMount } from "svelte";
+
+    export let availableVoices: SpeechSynthesisVoice[];
+    export let selectedVoice: SpeechSynthesisVoice | null;
+
+    // Load the selected voice from localStorage
+    onMount(() => {
+        const savedVoiceURI = localStorage.getItem("selectedVoiceURI");
+        if (savedVoiceURI) {
+            const voice = availableVoices.find(
+                (v) => v.voiceURI === savedVoiceURI,
+            );
+            if (voice) selectedVoice = voice;
+        }
+    });
+
+    // Save the selected voice to localStorage
+    $: {
+        if (selectedVoice) {
+            localStorage.setItem("selectedVoiceURI", selectedVoice.voiceURI);
+        }
+    }
+</script>
+
+<div class="tts-language-selector">
+    <label for="tts-language">TTS Language:</label>
+    <select id="tts-language" bind:value={selectedVoice}>
+        {#each availableVoices as voice}
+            <option value={voice}>{voice.name} ({voice.lang})</option>
+        {/each}
+    </select>
+</div>
+
+<style lang="scss">
+    .tts-language-selector {
+        margin-bottom: 1rem;
+
+        label {
+            margin-right: 0.5rem;
+            font-weight: 500;
+        }
+
+        select {
+            padding: 0.5rem;
+            border: 1px solid var(--card-border);
+            border-radius: 4px;
+            background-color: var(--card-background);
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+    }
+</style>

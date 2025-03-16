@@ -3,7 +3,7 @@
 </script>
 
 <section class="hero">
-    <h1>Welcome to Flashy</h1>
+    <h1>Welcome to ZapLearn ⚡</h1>
     <p>A useful tool for learning through customizable flashcards</p>
     <button on:click={() => goto("/dashboard")}>Get Started</button>
 </section>
@@ -35,8 +35,7 @@
         <div class="card feature">
             <h3>Translation Support</h3>
             <p>
-                Translate your flashcards to different languages using the DeepL
-                API.
+                Translate your flashcards to different languages using the Microsoft Translator API.
             </p>
         </div>
     </div>

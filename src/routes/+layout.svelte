@@ -18,7 +18,7 @@
     <nav>
         <div class="container flex-between">
             <div class="logo">
-                <a href="/">Flashy</a>
+                <a href="/">ZapLearn ⚡</a>
             </div>
             <div class="nav-links">
                 <a href="/" class:active={$page.url.pathname === "/"}>Home</a>
@@ -47,7 +47,7 @@
 
 <footer>
     <div class="container">
-        <p>&copy; {new Date().getFullYear()} Flashy</p>
+        <p>&copy; {new Date().getFullYear()} ZapLearn ⚡</p>
     </div>
 </footer>
 

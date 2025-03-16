@@ -4,8 +4,6 @@ ZapLearn is a web application built with SvelteKit, Svelte 5, TypeScript, and Sa
 
 ## Screenshots
 
-[Insert Screenshots Here - Examples below, replace with your own]
-
 * **Landing Page:**
     ![Landing Page Screenshot](static/readme_assets/landing.png)
 * **Dashboard:**

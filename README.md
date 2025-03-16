@@ -2,7 +2,7 @@
 
 ZapLearn is a web application built with SvelteKit, Svelte 5, TypeScript, and Sass, designed to help you learn effectively using customizable flashcards. It features Text-to-Speech (TTS) capabilities, translation support via the Azure Translator API, progress tracking, and persistent data storage using Airtable.
 
-Access it [here](zaplearn.pages.dev)
+Access it [here](https://zaplearn.pages.dev)
 
 ## Screenshots
 

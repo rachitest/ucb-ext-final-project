@@ -42,6 +42,7 @@ Access it [here](zaplearn.pages.dev)
 * **Backend:**
   * Airtable (for data storage)
   * Azure Translator API (for translations)
+  * Web Speech API (for TTS)
 * **Deployment:**
   * Cloudflare Pages
 

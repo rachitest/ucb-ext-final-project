@@ -98,13 +98,14 @@
 
         .card-actions {
             display: flex;
-            flex-wrap: wrap;
+            flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
             gap: 0.5rem;
             margin-bottom: 1.5rem;
 
             button {
-                flex: 1 1 auto;
+                flex: 1 1 auto; /* Allow buttons to grow and shrink */
                 white-space: nowrap;
+                min-width: 120px; /* Set a minimum width for buttons */
             }
 
             .icon-action {
@@ -197,6 +198,22 @@
 
                 &:hover {
                     background-color: color.adjust(#3a86ff, $lightness: -10%);
+                }
+            }
+        }
+    }
+
+    /* Responsive adjustments for mobile */
+    @media (max-width: 768px) {
+        .flashcard-back {
+            padding: 1rem;
+
+            .card-actions {
+                flex-direction: column; /* Stack buttons vertically on mobile */
+                gap: 0.5rem;
+
+                button {
+                    width: 100%; /* Full width buttons on mobile */
                 }
             }
         }

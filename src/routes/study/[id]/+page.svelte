@@ -2,7 +2,7 @@
   import { page } from "$app/stores";
   import { decks, appStore } from "$lib/stores/appStore";
   import { goto } from "$app/navigation";
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import type { Card } from "$lib/types";
   import { languages } from "$lib/languages";
   import TtsLanguageSelector from "$lib/components/TtsLanguageSelector.svelte";
@@ -27,10 +27,14 @@
   // TTS Language Dropdown
   let availableVoices: SpeechSynthesisVoice[] = [];
   let selectedVoice: SpeechSynthesisVoice | null = null;
+  let voicesLoaded = false; // Flag to indicate if voices have been loaded
+  let voiceLoadError = ""; // Store any error message
 
   $: currentCard = deck?.cards[currentCardIndex];
   $: hasNextCard = deck && currentCardIndex < deck.cards.length - 1;
   $: hasPrevCard = currentCardIndex > 0;
+
+  let voiceChangeTimeout: ReturnType<typeof setTimeout>; // Corrected type
 
   onMount(() => {
     if (!deck || deck.cards.length === 0) {
@@ -41,28 +45,58 @@
     loadVoices();
   });
 
-  function loadVoices() {
-    // Use onvoiceschanged to ensure voices are loaded
-    window.speechSynthesis.onvoiceschanged = () => {
-      availableVoices = window.speechSynthesis.getVoices();
-      // Try to load the previously selected voice, or default to the first available
-      const savedVoiceURI = localStorage.getItem("selectedVoiceURI");
-      selectedVoice =
-        availableVoices.find((v) => v.voiceURI === savedVoiceURI) ||
-        availableVoices[0];
-    };
+  onDestroy(() => {
+    clearTimeout(voiceChangeTimeout);
+    window.speechSynthesis.onvoiceschanged = null; // Good practice
+  });
 
-    // Check if voices are already loaded (they might be in some browsers)
-    availableVoices = window.speechSynthesis.getVoices();
-    if (availableVoices.length > 0) {
-      const savedVoiceURI = localStorage.getItem("selectedVoiceURI");
-      selectedVoice =
-        availableVoices.find((v) => v.voiceURI === savedVoiceURI) ||
-        availableVoices[0];
+  function loadVoices() {
+    if (!("speechSynthesis" in window)) {
+      voiceLoadError =
+        "Your browser does not support the Web Speech API. Please use a different browser (like Chrome or Edge).";
+      voicesLoaded = true; // We've "loaded" in the sense that we know the result
+      return;
     }
+
+    const tryLoadVoices = () => {
+      availableVoices = window.speechSynthesis.getVoices();
+      if (availableVoices.length > 0) {
+        const savedVoiceURI = localStorage.getItem("selectedVoiceURI");
+        selectedVoice =
+          availableVoices.find((v) => v.voiceURI === savedVoiceURI) ||
+          availableVoices[0];
+        voicesLoaded = true;
+        clearTimeout(voiceChangeTimeout); // Clear the timeout if voices are loaded
+        console.log("Voices loaded:", availableVoices);
+      }
+    };
+    // Try loading immediately
+    tryLoadVoices();
+
+    // Set up the onvoiceschanged listener
+    window.speechSynthesis.onvoiceschanged = () => {
+      console.log("onvoiceschanged fired");
+      tryLoadVoices();
+    };
+    // Set a timeout as a fallback
+    voiceChangeTimeout = setTimeout(() => {
+      if (!voicesLoaded) {
+        tryLoadVoices(); // One last try
+        if (availableVoices.length === 0) {
+          voiceLoadError =
+            "No speech synthesis voices found.  On Linux or Android, you may need to install a speech synthesis engine (e.g., espeak-ng, festival, or speech-dispatcher).";
+          voicesLoaded = true;
+        }
+      }
+    }, 500); // 500ms timeout
   }
 
   function speak(text: string) {
+    if (!voicesLoaded) {
+      // Handle the case where voices haven't loaded yet
+      alert("Voices are still loading. Please wait a moment.");
+      return;
+    }
     if (!("speechSynthesis" in window)) {
       alert("Sorry, your browser does not support text-to-speech!");
       return;
@@ -87,8 +121,10 @@
       isSpeaking = false;
     };
 
-    utterance.onerror = () => {
+    utterance.onerror = (event) => {
       isSpeaking = false;
+      console.error("Speech synthesis error:", event);
+      alert("Speech synthesis error.  Check the console for details.");
     };
 
     window.speechSynthesis.speak(utterance);
@@ -209,7 +245,18 @@
       </div>
     </div>
 
+    {#if !voicesLoaded}
+      <p>Loading voices...</p>
+    {/if}
+    {#if voiceLoadError}
+      <p class="error">{voiceLoadError}</p>
+    {/if}
+
     <TtsLanguageSelector {availableVoices} bind:selectedVoice />
+
+    <ProgressBar
+      progress={((currentCardIndex + 1) / deck.cards.length) * 100}
+    />
 
     <div class="flashcard-container">
       <div class="card flashcard">
@@ -242,7 +289,6 @@
             <button on:click={toggleAnswer}>Show Answer</button>
           </div>
         {/if}
-
         <ProgressBar progress={currentCard.progress} />
       </div>
     </div>
@@ -353,6 +399,9 @@
           cursor: not-allowed;
         }
       }
+    }
+    .error {
+      color: var(--error-color);
     }
   }
 

@@ -4,16 +4,7 @@
     export let availableVoices: SpeechSynthesisVoice[];
     export let selectedVoice: SpeechSynthesisVoice | null;
 
-    // Load the selected voice from localStorage
-    onMount(() => {
-        const savedVoiceURI = localStorage.getItem("selectedVoiceURI");
-        if (savedVoiceURI) {
-            const voice = availableVoices.find(
-                (v) => v.voiceURI === savedVoiceURI,
-            );
-            if (voice) selectedVoice = voice;
-        }
-    });
+    // Removed onMount function to consolidate voice logic in the parent
 
     // Save the selected voice to localStorage
     $: {
@@ -26,9 +17,13 @@
 <div class="tts-language-selector">
     <label for="tts-language">TTS Language:</label>
     <select id="tts-language" bind:value={selectedVoice}>
-        {#each availableVoices as voice}
-            <option value={voice}>{voice.name} ({voice.lang})</option>
-        {/each}
+        {#if availableVoices.length === 0}
+            <option value="" disabled>No voices available</option>
+        {:else}
+            {#each availableVoices as voice}
+                <option value={voice}>{voice.name} ({voice.lang})</option>
+            {/each}
+        {/if}
     </select>
 </div>
 
